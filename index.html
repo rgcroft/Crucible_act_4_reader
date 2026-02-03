@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Crucible - Act IV Interactive Reading</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .audio-controls {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .play-button {
+            background: #8B0000;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .play-button:hover {
+            background: #DC143C;
+            transform: scale(1.05);
+        }
+
+        .progress-container {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #8B0000 0%, #DC143C 100%);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .time-display {
+            font-size: 14px;
+            color: #495057;
+            margin-top: 5px;
+        }
+
+        .controls-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .control-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-button:hover {
+            background: #545b62;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .speed-control select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            background: white;
+            cursor: pointer;
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 300px);
+            min-height: 600px;
+        }
+
+        .pdf-container {
+            flex: 1;
+            border-right: 2px solid #dee2e6;
+            position: relative;
+        }
+
+        .pdf-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            color: #8B0000;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #8B0000;
+            padding-bottom: 10px;
+        }
+
+        .key-moment {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #8B0000;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .key-moment:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .key-moment.active {
+            background: #fff3cd;
+            border-left-color: #DC143C;
+        }
+
+        .moment-time {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .moment-location {
+            font-size: 11px;
+            color: #8B0000;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .moment-title {
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 5px;
+        }
+
+        .moment-description {
+            font-size: 14px;
+            color: #495057;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .pdf-container {
+                height: 600px;
+                border-right: none;
+                border-bottom: 2px solid #dee2e6;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>The Crucible - Act IV</h1>
+            <p>Interactive Reading Experience with Synchronized Audio</p>
+        </div>
+
+        <div class="audio-controls">
+            <div class="audio-player">
+                <button class="play-button" id="playButton">▶ Play</button>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <div class="controls-group">
+                    <button class="control-button" id="skipBack">⏪ 10s</button>
+                    <button class="control-button" id="skipForward">10s ⏩</button>
+                    
+                    <div class="speed-control">
+                        <label for="speedSelect">Speed:</label>
+                        <select id="speedSelect">
+                            <option value="0.75">0.75x</option>
+                            <option value="1" selected>1x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2">2x</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="pdf-container">
+                <iframe src="25_Crucible_Act_IV_Complete.pdf" id="pdfViewer"></iframe>
+            </div>
+
+            <div class="sidebar">
+                <h2>Key Moments</h2>
+                <div id="keyMoments"></div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio" src="Crucible_4.mp3"></audio>
+
+    <script>
+        const keyMomentsData = [
+            {
+                time: 0,
+                page: 661,
+                line: "1-5",
+                title: "Opening Scene: Salem Jail",
+                description: "Fall, in a dark jail cell. Sarah Good and Tituba await their fate, speaking of escape to Barbados."
+            },
+            {
+                time: 145,
+                page: 663,
+                line: "26-47",
+                title: "Danforth and Officials Arrive",
+                description: "Danforth, Hathorne, and Cheever enter. Discussion of Reverend Hale's unauthorized return and concerns about Parris."
+            },
+            {
+                time: 290,
+                page: 664,
+                line: "48-67",
+                title: "Parris's Troubling News",
+                description: "Parris reveals disturbing signs in the village and reports finding a dagger at his door."
+            },
+            {
+                time: 435,
+                page: 665,
+                line: "68-82",
+                title: "Abigail Has Vanished",
+                description: "Parris reveals Abigail and Mercy Lewis have fled Salem, stealing his money. Fear of rebellion grows."
+            },
+            {
+                time: 580,
+                page: 666,
+                line: "83-101",
+                title: "Hale Returns",
+                description: "Reverend Hale enters, attempting to convince condemned prisoners to confess and save their lives."
+            },
+            {
+                time: 725,
+                page: 667,
+                line: "102-119",
+                title: "Danforth Refuses Postponement",
+                description: "Danforth adamantly refuses to delay executions, citing consistency and justice."
+            },
+            {
+                time: 870,
+                page: 668,
+                line: "120-137",
+                title: "Hale's Desperate Plea",
+                description: "Hale describes the chaos in Salem and pleads with officials, blood on his conscience."
+            },
+            {
+                time: 1015,
+                page: 669,
+                line: "138-150",
+                title: "Elizabeth Is Brought In",
+                description: "Elizabeth Proctor is summoned to convince John to confess. Hale appeals to her emotions."
+            },
+            {
+                time: 1160,
+                page: 670,
+                line: "151-189",
+                title: "John and Elizabeth Reunite",
+                description: "The Proctors are alone. Tender reunion as they discuss their children and Giles Corey's death."
+            },
+            {
+                time: 1450,
+                page: 672,
+                line: "190-208",
+                title: "Confession Discussion",
+                description: "John contemplates confessing. Elizabeth refuses to judge him, telling him he must decide."
+            },
+            {
+                time: 1650,
+                page: 673,
+                line: "209-224",
+                title: "Proctor Decides to Confess",
+                description: "John declares he wants his life. Officials rush to record his confession."
+            },
+            {
+                time: 1795,
+                page: 674,
+                line: "225-246",
+                title: "The Confession Begins",
+                description: "Proctor admits to seeing the Devil. Rebecca Nurse is brought in to witness."
+            },
+            {
+                time: 1940,
+                page: 675,
+                line: "247-274",
+                title: "Proctor Refuses to Implicate Others",
+                description: "John will not accuse Rebecca or others. He struggles with condemning innocent people."
+            },
+            {
+                time: 2160,
+                page: 676,
+                line: "275-290",
+                title: "The Name Debate",
+                description: "Proctor signs but refuses to hand over the confession to be posted publicly."
+            },
+            {
+                time: 2305,
+                page: 677,
+                line: "288-294",
+                title: "\"Because It Is My Name!\"",
+                description: "Proctor's powerful outcry about his name and integrity - the play's climactic moment."
+            },
+            {
+                time: 2450,
+                page: 678,
+                line: "295-306",
+                title: "Proctor Tears the Confession",
+                description: "John tears up his confession, choosing death over betraying his principles and friends."
+            },
+            {
+                time: 2595,
+                page: 679,
+                line: "305-306",
+                title: "Elizabeth's Final Words",
+                description: "As Proctor is led to execution, Elizabeth declares he has his goodness now. The drums roll."
+            }
+        ];
+
+        // Audio elements and controls
+        const audio = document.getElementById('audio');
+        const playButton = document.getElementById('playButton');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const speedSelect = document.getElementById('speedSelect');
+        const skipBackButton = document.getElementById('skipBack');
+        const skipForwardButton = document.getElementById('skipForward');
+        const keyMomentsContainer = document.getElementById('keyMoments');
+
+        // Format time helper
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Play/Pause toggle
+        playButton.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playButton.textContent = '⏸ Pause';
+            } else {
+                audio.pause();
+                playButton.textContent = '▶ Play';
+            }
+        });
+
+        // Update progress bar
+        audio.addEventListener('timeupdate', () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+            
+            // Update active key moment
+            updateActiveKeyMoment(audio.currentTime);
+        });
+
+        // Set duration when loaded
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+
+        // Click on progress bar to seek
+        progressBar.addEventListener('click', (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = percent * audio.duration;
+        });
+
+        // Speed control
+        speedSelect.addEventListener('change', (e) => {
+            audio.playbackRate = parseFloat(e.target.value);
+        });
+
+        // Skip buttons
+        skipBackButton.addEventListener('click', () => {
+            audio.currentTime = Math.max(0, audio.currentTime - 10);
+        });
+
+        skipForwardButton.addEventListener('click', () => {
+            audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+        });
+
+        // Create key moments
+        function createKeyMoments() {
+            keyMomentsData.forEach((moment, index) => {
+                const momentEl = document.createElement('div');
+                momentEl.className = 'key-moment';
+                momentEl.dataset.time = moment.time;
+                momentEl.dataset.index = index;
+                
+                momentEl.innerHTML = `
+                    <div class="moment-time">${formatTime(moment.time)}</div>
+                    <div class="moment-location">Page ${moment.page}, Lines ${moment.line}</div>
+                    <div class="moment-title">${moment.title}</div>
+                    <div class="moment-description">${moment.description}</div>
+                `;
+                
+                momentEl.addEventListener('click', () => {
+                    audio.currentTime = moment.time;
+                    if (audio.paused) {
+                        audio.play();
+                        playButton.textContent = '⏸ Pause';
+                    }
+                });
+                
+                keyMomentsContainer.appendChild(momentEl);
+            });
+        }
+
+        // Update active key moment
+        function updateActiveKeyMoment(currentTime) {
+            const moments = document.querySelectorAll('.key-moment');
+            let activeIndex = -1;
+            
+            for (let i = keyMomentsData.length - 1; i >= 0; i--) {
+                if (currentTime >= keyMomentsData[i].time) {
+                    activeIndex = i;
+                    break;
+                }
+            }
+            
+            moments.forEach((moment, index) => {
+                if (index === activeIndex) {
+                    moment.classList.add('active');
+                } else {
+                    moment.classList.remove('active');
+                }
+            });
+        }
+
+        // Initialize
+        createKeyMoments();
+
+        // Auto-pause at end
+        audio.addEventListener('ended', () => {
+            playButton.textContent = '▶ Play';
+        });
+    </script>
+</body>
+</html>
